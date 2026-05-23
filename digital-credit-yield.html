@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Digital Credit Yield">
+  <link rel="apple-touch-icon" href="data:image/png;base64,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">
+  <title>Digital Credit Yield</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    :root {
+      --bg: #060809;
+      --card-bg: #161b27;
+      --card-border: rgba(255,255,255,0.08);
+      --orange: #f5a623;
+      --white: #ffffff;
+      --muted: #6b7280;
+      --input-bg: #1e2535;
+      --input-border: rgba(255,255,255,0.1);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'Sora', sans-serif;
+      color: var(--white);
+      overflow: hidden;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top,24px) 24px env(safe-area-inset-bottom,24px);
+    }
+
+    /* Card — contains everything */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 480px;
+      padding: 28px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      cursor: default;
+      user-select: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .card.editing {
+      border-color: rgba(245,166,35,0.35);
+    }
+
+    /* Header row */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .header-dot {
+      width: 13px;
+      height: 13px;
+      background: var(--orange);
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .header-text {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Label */
+    .card-label {
+      color: var(--orange);
+      font-size: 17px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* Thought text */
+    .thought-display {
+      font-size: clamp(22px, 6vw, 30px);
+      font-weight: 800;
+      line-height: 1.35;
+      text-align: center;
+      color: var(--white);
+      padding: 10px 0 20px;
+      word-break: break-word;
+      transition: opacity 0.3s ease;
+    }
+
+    .thought-display.fading { opacity: 0; }
+
+    /* Hint */
+    .hint {
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.45;
+      margin-bottom: 20px;
+      transition: opacity 0.4s ease;
+    }
+    .hint.hidden { opacity: 0; pointer-events: none; }
+
+    /* Footer inside card */
+    .card-footer {
+      text-align: center;
+      color: var(--white);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      opacity: 0.55;
+    }
+
+    /* Edit panel */
+    .edit-section {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .edit-section.open {
+      max-height: 220px;
+      opacity: 1;
+      margin-bottom: 16px;
+    }
+
+    .edit-section-inner {
+      padding-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      color: var(--white);
+      font-family: 'Sora', sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+      min-height: 80px;
+      transition: border-color 0.2s ease;
+      -webkit-appearance: none;
+    }
+
+    textarea:focus { border-color: var(--orange); }
+    textarea::placeholder { color: var(--muted); }
+
+    .btn-row { display: flex; gap: 10px; }
+
+    .btn {
+      flex: 1;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      -webkit-appearance: none;
+    }
+
+    .btn:active { opacity: 0.8; transform: scale(0.97); }
+    .btn-primary { background: var(--orange); color: #0d1117; }
+    .btn-secondary { background: var(--input-bg); color: var(--muted); border: 1px solid var(--input-border); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--orange);
+      color: #0d1117;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="card" id="card">
+
+  <div class="header">
+    <div class="header-dot"></div>
+    <div class="header-text">Digital Credit Yield · <span id="date-display"></span></div>
+  </div>
+
+  <div class="card-label">Thought for the Day</div>
+
+  <div class="thought-display" id="thought-display">Another month, another dividend. Repeat.</div>
+
+  <div class="hint" id="hint">double-tap to edit</div>
+
+  <div class="edit-section" id="edit-section">
+    <div class="edit-section-inner">
+      <textarea id="thought-input" placeholder="Type your thought for the day…" rows="3"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+        <button class="btn btn-primary" onclick="applyThought()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer">digitalcredityield.com</div>
+
+</div>
+
+<div class="toast" id="toast">Thought saved ✓</div>
+
+<script>
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now = new Date();
+  document.getElementById('date-display').textContent =
+    days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+
+  const saved = localStorage.getItem('dcy_thought');
+  if (saved) document.getElementById('thought-display').textContent = saved;
+
+  setTimeout(() => {
+    if (!document.getElementById('edit-section').classList.contains('open'))
+      document.getElementById('hint').classList.add('hidden');
+  }, 4000);
+
+  let lastTap = 0;
+  document.getElementById('card').addEventListener('touchend', function(e) {
+    const t = Date.now();
+    if (t - lastTap < 300 && t - lastTap > 0) openEdit();
+    lastTap = t;
+  });
+
+  function openEdit() {
+    document.getElementById('thought-input').value = document.getElementById('thought-display').textContent.trim();
+    document.getElementById('edit-section').classList.add('open');
+    document.getElementById('card').classList.add('editing');
+    document.getElementById('hint').classList.add('hidden');
+    setTimeout(() => document.getElementById('thought-input').focus(), 350);
+  }
+
+  function cancelEdit() {
+    document.getElementById('edit-section').classList.remove('open');
+    document.getElementById('card').classList.remove('editing');
+    document.activeElement.blur();
+  }
+
+  function applyThought() {
+    const val = document.getElementById('thought-input').value.trim();
+    if (!val) return;
+    const display = document.getElementById('thought-display');
+    display.classList.add('fading');
+    setTimeout(() => {
+      display.textContent = val;
+      display.classList.remove('fading');
+      localStorage.setItem('dcy_thought', val);
+    }, 300);
+    document.getElementById('edit-section').classList.remove('open');
+    document.getElementById('card').classList.remove('editing');
+    document.activeElement.blur();
+    showToast('Thought saved ✓');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+</script>
+</body>
+</html>
