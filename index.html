@@ -295,6 +295,8 @@
     <div class="block-3 display-block hidden" id="block-3"></div>
   </div>
 
+  <img id="daily-chart" src="" alt="Daily chart" style="display:none;width:100%;border-radius:10px;margin-top:16px;">
+
   <div class="hint" id="hint">double-tap to edit</div>
 
   <div class="edit-section" id="edit-section">
@@ -359,6 +361,32 @@
   }
 
   renderBlocks();
+
+  async function fetchDailyCard() {
+    try {
+      const res = await fetch('https://digitalcredityield.com/api/dcy-card');
+      if (!res.ok) return;
+      const card = await res.json();
+      if (!card.updatedAt) return;
+
+      const stored = localStorage.getItem('dcy_card_timestamp');
+      if (stored && card.updatedAt <= stored) return;
+
+      localStorage.setItem('dcy_thought_1', card.box1 || 'Snapshot');
+      localStorage.setItem('dcy_thought_2', card.box2 || '');
+      localStorage.setItem('dcy_thought_3', card.box3 || '');
+      localStorage.setItem('dcy_card_timestamp', card.updatedAt);
+      renderBlocks();
+
+      const chartImg = document.getElementById('daily-chart');
+      if (card.hasChart && chartImg) {
+        chartImg.src = 'https://digitalcredityield.com/api/dcy-chart?' + Date.now();
+        chartImg.style.display = 'block';
+      }
+    } catch (e) { /* silent fail — works offline */ }
+  }
+
+  fetchDailyCard();
 
   setTimeout(() => {
     if (!document.getElementById('edit-section').classList.contains('open'))
