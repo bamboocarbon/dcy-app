@@ -93,6 +93,8 @@
       opacity: 0;
     }
 
+    .card.editing .stars-row { display: none; }
+
     /* Block 1: orange — email "Question" label style (18px / 700) */
     .block-1 {
       font-size: 18px;
@@ -342,7 +344,8 @@
     .card.news .banner, .card.quiz .banner { display: none; }
 
     /* Double-tap-to-edit only applies to Thought mode */
-    .card.weekend .hint, .card.news .hint, .card.quiz .hint { display: none; }
+    .card.news .hint, .card.quiz .hint { display: none; }
+    .card.weekend .hint { color: #8A8F94; }
   </style>
 </head>
 <body>
@@ -500,8 +503,10 @@
     });
   }
 
+  const WEEKEND_DEFAULT = 'Markets are shut. Your dividends still compound.';
+
   function renderWeekend() {
-    const thought = localStorage.getItem('dcy_thought_2') || DEFAULTS[2];
+    const thought = localStorage.getItem('dcy_weekend_thought') || WEEKEND_DEFAULT;
     setBlocks('Weekend Thought', thought, '');
   }
 
@@ -541,8 +546,9 @@
     card.classList.remove('weekend', 'news', 'quiz');
     if (mode !== 'thought') card.classList.add(mode);
 
-    document.getElementById('dev-edit-btn').style.display = mode === 'thought' ? '' : 'none';
-    if (mode !== 'thought' && document.getElementById('edit-section').classList.contains('open')) {
+    const editable = mode === 'thought' || mode === 'weekend';
+    document.getElementById('dev-edit-btn').style.display = editable ? '' : 'none';
+    if (!editable && document.getElementById('edit-section').classList.contains('open')) {
       cancelEdit();
     }
 
@@ -563,18 +569,31 @@
 
   let lastTap = 0;
   document.getElementById('card').addEventListener('touchend', function() {
-    if (currentMode !== 'thought') return;
+    if (currentMode !== 'thought' && currentMode !== 'weekend') return;
     if (document.getElementById('edit-section').classList.contains('open')) return;
     const t = Date.now();
     if (t - lastTap < 300 && t - lastTap > 0) openEdit();
     lastTap = t;
   });
 
+  // Thought mode edits all 3 blocks; Weekend Thought only has one free-text
+  // line (the "Weekend Thought" label and star decoration are fixed), stored
+  // separately so writing a weekend thought never overwrites the weekday one.
   function openEdit() {
-    [1, 2, 3].forEach(i => {
-      const val = localStorage.getItem('dcy_thought_' + i);
-      document.getElementById('input-' + i).value = val !== null ? val : DEFAULTS[i];
+    const weekend = currentMode === 'weekend';
+    [1, 3].forEach(i => {
+      document.getElementById('input-' + i).style.display = weekend ? 'none' : '';
     });
+    if (weekend) {
+      document.getElementById('input-2').value = localStorage.getItem('dcy_weekend_thought') || WEEKEND_DEFAULT;
+      document.getElementById('input-2').placeholder = 'Weekend thought…';
+    } else {
+      [1, 2, 3].forEach(i => {
+        const val = localStorage.getItem('dcy_thought_' + i);
+        document.getElementById('input-' + i).value = val !== null ? val : DEFAULTS[i];
+      });
+      document.getElementById('input-2').placeholder = 'Main thought…';
+    }
     document.getElementById('edit-section').classList.add('open');
     document.getElementById('card').classList.add('editing');
     document.getElementById('hint').classList.add('hidden');
@@ -587,6 +606,17 @@
   }
 
   function applyThought() {
+    if (currentMode === 'weekend') {
+      const val = document.getElementById('input-2').value.trim();
+      if (val) localStorage.setItem('dcy_weekend_thought', val);
+      else localStorage.removeItem('dcy_weekend_thought');
+      document.getElementById('edit-section').classList.remove('open');
+      document.getElementById('card').classList.remove('editing');
+      document.activeElement.blur();
+      setTimeout(renderWeekend, 200);
+      showToast('Saved ✓');
+      return;
+    }
     [1, 2, 3].forEach(i => {
       const val = document.getElementById('input-' + i).value.trim();
       if (val) {
