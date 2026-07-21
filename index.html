@@ -276,9 +276,85 @@
       font-family: Arial, Helvetica, sans-serif;
       display: block;
     }
+
+    /* Mode selector — fixed, top-left, mirrors EDIT button's fixed positioning
+       so it never eats into the card's own vertical space budget. */
+    .mode-select-wrap {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 50;
+    }
+
+    #mode-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 8px;
+      padding: 6px 26px 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23f5a623'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    #mode-select:focus { outline: none; border-color: var(--orange); }
+
+    /* Weekend hero image — corners are baked into the JPEG itself (matte-cream),
+       not CSS border-radius, to avoid the anti-aliased seam that shows up when a
+       scaled raster image is clipped with border-radius/overflow:hidden. */
+    .hero-wrap { display: none; }
+    .card.weekend .hero-wrap { display: block; }
+    .hero-wrap img { display: block; width: 100%; height: auto; margin-bottom: 16px; }
+
+    .stars-row {
+      display: none;
+      text-align: center;
+      color: var(--orange);
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .card.weekend .stars-row { display: block; }
+    .stars-row.top { padding-bottom: 10px; }
+    .stars-row.bottom { padding-top: 4px; }
+
+    /* Weekend card: deliberately cream, distinct from the standard dark card
+       and from the weekday email — the weekend's own look, native to the app. */
+    .card.weekend {
+      background: #F4F1EA;
+      border-color: rgba(0,0,0,0.06);
+    }
+    .card.weekend .header-text { color: #000000; }
+    .card.weekend .block-1 { color: #2E3A46; }
+    .card.weekend .block-2 { color: #4A5560; }
+    .card.weekend .block-3 { color: #8A8F94; }
+    .card.weekend .card-footer { color: #2E3A46; }
+    .card.weekend .card-footer > div:first-child { color: #8A8F94; }
+
+    /* News/Quiz reuse the standard dark card + block-1/2/3, just without the
+       STRC/SATA/BMNP tracking banner, which isn't relevant to that content. */
+    .card.news .banner, .card.quiz .banner { display: none; }
+
+    /* Double-tap-to-edit only applies to Thought mode */
+    .card.weekend .hint, .card.news .hint, .card.quiz .hint { display: none; }
   </style>
 </head>
 <body>
+
+<div class="mode-select-wrap">
+  <select id="mode-select" onchange="setMode(this.value)">
+    <option value="thought">Thought</option>
+    <option value="weekend">Weekend Thought</option>
+    <option value="news">News</option>
+    <option value="quiz">Quiz</option>
+  </select>
+</div>
 
 <div class="card" id="card">
 
@@ -287,13 +363,19 @@
     <div class="header-text">Digital Credit Yield · <span id="date-display"></span></div>
   </div>
 
-  <div class="banner">Tracking STRC, SATA and BMNP for growth</div>
+  <div class="hero-wrap" id="hero-wrap"><img src="weekend-hero.jpg" alt="An astronaut reading, relaxed, with Earth in view"></div>
+
+  <div class="banner" id="banner">Tracking STRC, SATA and BMNP for growth</div>
+
+  <div class="stars-row top">&#9733;&nbsp;&nbsp;&#9733;&nbsp;&nbsp;&#9733;</div>
 
   <div class="display-blocks" id="display-blocks">
     <div class="block-1 display-block" id="block-1">Thought for the Day</div>
     <div class="block-2 display-block" id="block-2">Another month, another dividend. Repeat.</div>
     <div class="block-3 display-block hidden" id="block-3"></div>
   </div>
+
+  <div class="stars-row bottom">&#9733;&nbsp;&nbsp;&#9733;&nbsp;&nbsp;&#9733;</div>
 
   <img id="daily-chart" src="" alt="Daily chart" style="display:none;width:100%;border-radius:10px;margin-top:16px;">
 
@@ -363,8 +445,6 @@
     });
   }
 
-  renderBlocks();
-
   async function fetchDailyCard() {
     try {
       const res = await fetch('https://digitalcredityield.com/api/dcy-card');
@@ -379,14 +459,99 @@
       localStorage.setItem('dcy_thought_2', card.box2 || '');
       localStorage.setItem('dcy_thought_3', card.box3 || '');
       localStorage.setItem('dcy_card_timestamp', card.updatedAt);
-      renderBlocks();
+      if (currentMode === 'thought') renderBlocks();
 
-      const chartImg = document.getElementById('daily-chart');
-      if (card.hasChart && chartImg) {
-        chartImg.src = 'https://digitalcredityield.com/api/dcy-chart?' + Date.now();
-        chartImg.style.display = 'block';
+      hasChart = !!card.hasChart;
+      if (hasChart) {
+        document.getElementById('daily-chart').src = 'https://digitalcredityield.com/api/dcy-chart?' + Date.now();
       }
+      if (currentMode === 'thought') updateChartVisibility();
     } catch (e) { /* silent fail — works offline */ }
+  }
+
+  // ---- View modes: Thought / Weekend Thought / News / Quiz ----------------
+  // Weekend Thought reuses the same thought text as Thought (dcy_thought_2),
+  // just presented with the cream weekend styling — same pattern as the
+  // weekday/weekend split in the email (scripts/motivationEmail.js), which
+  // also renders one underlying thought through two different templates.
+
+  function isWeekend(d = new Date()) {
+    const day = d.getDay(); // local device time — fine for a personal single-user app
+    return day === 0 || day === 6;
+  }
+
+  let currentMode = isWeekend() ? 'weekend' : 'thought';
+  let hasChart = false;
+
+  function updateChartVisibility() {
+    document.getElementById('daily-chart').style.display =
+      (currentMode === 'thought' && hasChart) ? 'block' : 'none';
+  }
+
+  function setBlocks(b1, b2, b3) {
+    [[1, b1], [2, b2], [3, b3]].forEach(([i, text]) => {
+      const block = document.getElementById('block-' + i);
+      if (text) {
+        block.textContent = text;
+        block.classList.remove('hidden');
+      } else {
+        block.classList.add('hidden');
+      }
+    });
+  }
+
+  function renderWeekend() {
+    const thought = localStorage.getItem('dcy_thought_2') || DEFAULTS[2];
+    setBlocks('Weekend Thought', thought, '');
+  }
+
+  async function renderNews() {
+    setBlocks('News', 'Loading…', '');
+    try {
+      const res = await fetch('https://digitalcredityield.com/api/news');
+      const items = await res.json();
+      const item = items[0];
+      if (!item) { setBlocks('News', 'No recent news', ''); return; }
+      setBlocks(item.tag + ' · ' + item.date, item.headline, item.description || '');
+    } catch (e) {
+      setBlocks('News', 'Unable to load — check connection', '');
+    }
+  }
+
+  async function renderQuiz() {
+    setBlocks('Quiz', 'Loading…', '');
+    try {
+      const res = await fetch('https://digitalcredityield.com/api/thoughts?kind=quiz');
+      const items = await res.json();
+      // Some quiz entries are X-post-only (empty text, just a url) — skip those,
+      // this card can only show a plain-text question.
+      const item = items.find(i => i.text && i.text.trim());
+      if (!item) { setBlocks('Quiz', 'No quiz available', ''); return; }
+      setBlocks('Quiz', item.text, item.answer ? ('Answer: ' + item.answer) : '');
+    } catch (e) {
+      setBlocks('Quiz', 'Unable to load — check connection', '');
+    }
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('mode-select').value = mode;
+
+    const card = document.getElementById('card');
+    card.classList.remove('weekend', 'news', 'quiz');
+    if (mode !== 'thought') card.classList.add(mode);
+
+    document.getElementById('dev-edit-btn').style.display = mode === 'thought' ? '' : 'none';
+    if (mode !== 'thought' && document.getElementById('edit-section').classList.contains('open')) {
+      cancelEdit();
+    }
+
+    if (mode === 'thought') renderBlocks();
+    else if (mode === 'weekend') renderWeekend();
+    else if (mode === 'news') renderNews();
+    else if (mode === 'quiz') renderQuiz();
+
+    updateChartVisibility();
   }
 
   fetchDailyCard();
@@ -398,6 +563,7 @@
 
   let lastTap = 0;
   document.getElementById('card').addEventListener('touchend', function() {
+    if (currentMode !== 'thought') return;
     if (document.getElementById('edit-section').classList.contains('open')) return;
     const t = Date.now();
     if (t - lastTap < 300 && t - lastTap > 0) openEdit();
@@ -453,6 +619,8 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2000);
   }
+
+  setMode(currentMode);
 </script>
 </body>
 </html>
