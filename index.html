@@ -465,7 +465,7 @@
       localStorage.setItem('dcy_card_timestamp', card.updatedAt);
       if (currentMode === 'thought') renderBlocks();
 
-      hasChart = !!card.hasChart;
+      hasChart = false; // chart disabled in the app; email and video keep it
       if (hasChart) {
         document.getElementById('daily-chart').src = 'https://digitalcredityield.com/api/dcy-chart?' + Date.now();
       }
